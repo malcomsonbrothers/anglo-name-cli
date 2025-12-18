@@ -120,7 +120,7 @@ fn test_unique_names_by_default() {
 
 #[test]
 fn test_error_when_requesting_too_many_unique() {
-    // Request more unique names than possible (male only, no middle = 741 * 500 = 370,500)
+    // Request more unique names than possible (male only, no middle = 741 * 482 = 357,162)
     cmd()
         .args(["-n", "400000", "-s", "male"])
         .assert()

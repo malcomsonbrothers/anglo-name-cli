@@ -155,7 +155,7 @@ mod tests {
             allow_duplicates: false,
         };
 
-        // Male only, no middle = 741 * 500 = 370,500 max
+        // Male only, no middle = 741 * 482 = 357,162 max
         let result = generator.generate_many(&config, 400_000);
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("Cannot generate"));

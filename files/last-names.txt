@@ -21,7 +21,6 @@ Hall
 Lewis
 Harris
 Clarke
-Patel
 Jackson
 Wood
 Turner
@@ -61,14 +60,11 @@ Murphy
 Miller
 Cox
 Richards
-Khan
 Marshall
 Anderson
 Simpson
 Ellis
 Adams
-Singh
-Begum
 Wilkinson
 Foster
 Chapman
@@ -77,9 +73,7 @@ Webb
 Rogers
 Gray
 Mason
-Ali
 Hunt
-Hussain
 Campbell
 Matthews
 Owen
@@ -100,10 +94,8 @@ Dixon
 Harvey
 Graham
 Pearson
-Ahmed
 Fletcher
 Walsh
-Kaur
 Gibson
 Howard
 Andrews
@@ -169,7 +161,6 @@ Kennedy
 Williamson
 Bird
 Gardner
-Shah
 Dean
 Lane
 Cooke
@@ -245,7 +236,6 @@ Frost
 Lambert
 Stephens
 Blake
-Akhtar
 Lynch
 Goodwin
 Barton
@@ -255,7 +245,6 @@ Cunningham
 Quinn
 Barnett
 Baxter
-Bibi
 Clayton
 Nash
 Greenwood
@@ -289,7 +278,6 @@ Peters
 Lucas
 Knowles
 Hartley
-Miah
 Simmons
 Morton
 Alexander
@@ -343,7 +331,6 @@ Kirby
 Bowen
 Savage
 Bull
-Wong
 Dobson
 Smart
 Wilkins
@@ -387,11 +374,9 @@ Law
 Hooper
 Noble
 Dyer
-Rahman
 Clements
 Moran
 Sykes
-Chan
 Doherty
 Connolly
 Joyce
@@ -448,10 +433,8 @@ Boyle
 Myers
 Turnbull
 Wallis
-Mahmood
 Sims
 Swift
-Iqbal
 Pope
 Brady
 Chamberlain
@@ -480,7 +463,6 @@ Potts
 Bevan
 Hargreaves
 McLean
-Mistry
 Bruce
 Howells
 Hyde
