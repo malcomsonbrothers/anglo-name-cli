@@ -153,3 +153,118 @@ fn test_version_flag() {
         .success()
         .stdout(predicate::str::contains("anglo-name"));
 }
+
+// Email and password tests
+
+#[test]
+fn test_email_flag() {
+    cmd()
+        .args(["--email"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("@"));
+}
+
+#[test]
+fn test_email_with_custom_domain() {
+    cmd()
+        .args(["--email", "--domain", "example.com"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("@example.com"));
+}
+
+#[test]
+fn test_password_flag() {
+    let output = cmd().args(["--password"]).output().unwrap();
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    // Output should be name | password (32 chars)
+    assert!(stdout.contains("|"), "Expected pipe separator in output");
+    // Password should be 32 chars after the pipe
+    let parts: Vec<&str> = stdout.trim().split(" | ").collect();
+    assert_eq!(parts.len(), 2, "Expected name and password separated by |");
+    assert_eq!(parts[1].len(), 32, "Password should be 32 characters");
+}
+
+#[test]
+fn test_email_and_password_together() {
+    cmd()
+        .args(["--email", "--password"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("@"))
+        .stdout(predicate::str::contains("|"));
+}
+
+#[test]
+fn test_domain_requires_email() {
+    cmd().args(["--domain", "example.com"]).assert().failure();
+}
+
+#[test]
+fn test_json_with_email() {
+    cmd()
+        .args(["-f", "json", "--email"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"email\":"));
+}
+
+#[test]
+fn test_json_with_password() {
+    cmd()
+        .args(["-f", "json", "--password"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"password\":"));
+}
+
+#[test]
+fn test_csv_with_email_and_password() {
+    cmd()
+        .args(["-f", "csv", "--email", "--password"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("email"))
+        .stdout(predicate::str::contains("password"));
+}
+
+#[test]
+fn test_email_strips_apostrophes() {
+    // Generate many names to increase chance of hitting an O'Brien-like name
+    // Instead, we can check that no emails contain apostrophes
+    let output = cmd()
+        .args(["-n", "50", "--email", "--domain", "test.com"])
+        .output()
+        .unwrap();
+    let stdout = String::from_utf8_lossy(&output.stdout);
+
+    for line in stdout.lines() {
+        if line.contains("@") {
+            // Extract email part
+            let parts: Vec<&str> = line.split(" | ").collect();
+            if parts.len() >= 2 {
+                let email = parts[1];
+                assert!(
+                    !email.contains('\''),
+                    "Email should not contain apostrophes: {}",
+                    email
+                );
+                assert!(
+                    !email.contains('-'),
+                    "Email should not contain hyphens: {}",
+                    email
+                );
+                assert!(
+                    email.chars().all(|c| c.is_ascii_lowercase()
+                        || c.is_ascii_digit()
+                        || c == '.'
+                        || c == '@'),
+                    "Email should only contain lowercase letters, digits, dots, and @: {}",
+                    email
+                );
+            }
+        }
+    }
+}

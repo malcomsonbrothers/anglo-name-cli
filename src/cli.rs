@@ -33,6 +33,18 @@ pub struct Args {
     /// Allow duplicate names (by default all names are unique)
     #[arg(long)]
     pub allow_duplicates: bool,
+
+    /// Generate email addresses for each name
+    #[arg(short = 'e', long)]
+    pub email: bool,
+
+    /// Generate passwords for each name
+    #[arg(short = 'p', long)]
+    pub password: bool,
+
+    /// Email domain (default: random gmail.com or outlook.com)
+    #[arg(short = 'd', long, requires = "email")]
+    pub domain: Option<String>,
 }
 
 #[derive(ValueEnum, Clone, Debug, Default)]

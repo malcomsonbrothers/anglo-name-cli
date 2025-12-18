@@ -1,6 +1,7 @@
+use crate::credentials::PersonRecord;
 use crate::name::NameParts;
 
-use super::format::NameFormatter;
+use super::format::{NameFormatter, PersonFormatter};
 
 /// Plain text formatter - outputs one name per line.
 pub struct PlainFormatter;
@@ -10,6 +11,25 @@ impl NameFormatter for PlainFormatter {
         Ok(names
             .iter()
             .map(|n| n.full_name())
+            .collect::<Vec<_>>()
+            .join("\n"))
+    }
+}
+
+impl PersonFormatter for PlainFormatter {
+    fn format(&self, records: &[PersonRecord]) -> anyhow::Result<String> {
+        Ok(records
+            .iter()
+            .map(|r| {
+                let mut parts = vec![r.name.full_name()];
+                if let Some(ref email) = r.email {
+                    parts.push(email.clone());
+                }
+                if let Some(ref password) = r.password {
+                    parts.push(password.clone());
+                }
+                parts.join(" | ")
+            })
             .collect::<Vec<_>>()
             .join("\n"))
     }
@@ -28,7 +48,7 @@ mod tests {
             last_name: "Smith".to_string(),
         }];
 
-        let output = formatter.format(&names).unwrap();
+        let output = NameFormatter::format(&formatter, &names).unwrap();
         assert_eq!(output, "John Smith");
     }
 
@@ -48,7 +68,7 @@ mod tests {
             },
         ];
 
-        let output = formatter.format(&names).unwrap();
+        let output = NameFormatter::format(&formatter, &names).unwrap();
         assert_eq!(output, "John Smith\nJane Marie Doe");
     }
 
@@ -57,7 +77,75 @@ mod tests {
         let formatter = PlainFormatter;
         let names: Vec<NameParts> = vec![];
 
-        let output = formatter.format(&names).unwrap();
+        let output = NameFormatter::format(&formatter, &names).unwrap();
         assert_eq!(output, "");
+    }
+
+    #[test]
+    fn test_plain_format_person_record_name_only() {
+        let formatter = PlainFormatter;
+        let records = vec![PersonRecord {
+            name: NameParts {
+                first_name: "John".to_string(),
+                middle_name: None,
+                last_name: "Smith".to_string(),
+            },
+            email: None,
+            password: None,
+        }];
+
+        let output = PersonFormatter::format(&formatter, &records).unwrap();
+        assert_eq!(output, "John Smith");
+    }
+
+    #[test]
+    fn test_plain_format_person_record_with_email() {
+        let formatter = PlainFormatter;
+        let records = vec![PersonRecord {
+            name: NameParts {
+                first_name: "John".to_string(),
+                middle_name: None,
+                last_name: "Smith".to_string(),
+            },
+            email: Some("john.smith@example.com".to_string()),
+            password: None,
+        }];
+
+        let output = PersonFormatter::format(&formatter, &records).unwrap();
+        assert_eq!(output, "John Smith | john.smith@example.com");
+    }
+
+    #[test]
+    fn test_plain_format_person_record_with_password() {
+        let formatter = PlainFormatter;
+        let records = vec![PersonRecord {
+            name: NameParts {
+                first_name: "John".to_string(),
+                middle_name: None,
+                last_name: "Smith".to_string(),
+            },
+            email: None,
+            password: Some("secret123".to_string()),
+        }];
+
+        let output = PersonFormatter::format(&formatter, &records).unwrap();
+        assert_eq!(output, "John Smith | secret123");
+    }
+
+    #[test]
+    fn test_plain_format_person_record_with_both() {
+        let formatter = PlainFormatter;
+        let records = vec![PersonRecord {
+            name: NameParts {
+                first_name: "John".to_string(),
+                middle_name: None,
+                last_name: "Smith".to_string(),
+            },
+            email: Some("john.smith@example.com".to_string()),
+            password: Some("secret123".to_string()),
+        }];
+
+        let output = PersonFormatter::format(&formatter, &records).unwrap();
+        assert_eq!(output, "John Smith | john.smith@example.com | secret123");
     }
 }
