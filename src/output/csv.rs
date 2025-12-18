@@ -1,6 +1,6 @@
 use anyhow::Context;
 
-use crate::credentials::PersonRecord;
+use crate::creds::PersonRecord;
 use crate::name::NameParts;
 
 use super::format::{NameFormatter, PersonFormatter};
@@ -40,6 +40,7 @@ impl PersonFormatter for CsvFormatter {
         // Determine which optional columns to include based on first record
         let has_email = records.first().is_some_and(|r| r.email.is_some());
         let has_password = records.first().is_some_and(|r| r.password.is_some());
+        let has_birthday = records.first().is_some_and(|r| r.birthday.is_some());
 
         // Build header dynamically
         let mut header = vec!["first_name", "middle_name", "last_name", "full_name"];
@@ -48,6 +49,9 @@ impl PersonFormatter for CsvFormatter {
         }
         if has_password {
             header.push("password");
+        }
+        if has_birthday {
+            header.push("birthday");
         }
         wtr.write_record(&header)
             .with_context(|| "CsvFormatter::format_persons::0")?;
@@ -64,6 +68,9 @@ impl PersonFormatter for CsvFormatter {
             }
             if has_password {
                 row.push(record.password.clone().unwrap_or_default());
+            }
+            if has_birthday {
+                row.push(record.birthday.clone().unwrap_or_default());
             }
             wtr.write_record(&row)
                 .with_context(|| format!("CsvFormatter::format_persons::{}", i + 1))?;
@@ -155,6 +162,7 @@ mod tests {
             },
             email: None,
             password: None,
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();
@@ -174,6 +182,7 @@ mod tests {
             },
             email: Some("john.smith@example.com".to_string()),
             password: None,
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();
@@ -193,6 +202,7 @@ mod tests {
             },
             email: Some("john.smith@example.com".to_string()),
             password: Some("secret123".to_string()),
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();

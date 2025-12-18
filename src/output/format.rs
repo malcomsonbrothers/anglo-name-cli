@@ -1,4 +1,4 @@
-use crate::credentials::PersonRecord;
+use crate::creds::PersonRecord;
 use crate::name::NameParts;
 
 /// Supported output formats.

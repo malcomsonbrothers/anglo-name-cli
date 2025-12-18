@@ -1,3 +1,4 @@
+use crate::birthday::DateRange;
 use crate::name::NameParts;
 
 /// Configuration for credential generation.
@@ -6,6 +7,7 @@ pub struct CredentialConfig {
     pub generate_email: bool,
     pub generate_password: bool,
     pub email_domain: Option<String>,
+    pub birthday_range: Option<DateRange>,
 }
 
 /// A complete person record with name and optional credentials.
@@ -14,6 +16,7 @@ pub struct PersonRecord {
     pub name: NameParts,
     pub email: Option<String>,
     pub password: Option<String>,
+    pub birthday: Option<String>,
 }
 
 impl PersonRecord {
@@ -23,6 +26,7 @@ impl PersonRecord {
             name,
             email: None,
             password: None,
+            birthday: None,
         }
     }
 
@@ -35,6 +39,12 @@ impl PersonRecord {
     /// Add a password to the record.
     pub fn with_password(mut self, password: String) -> Self {
         self.password = Some(password);
+        self
+    }
+
+    /// Add a birthday to the record.
+    pub fn with_birthday(mut self, birthday: String) -> Self {
+        self.birthday = Some(birthday);
         self
     }
 }

@@ -1,4 +1,4 @@
-use crate::credentials::PersonRecord;
+use crate::creds::PersonRecord;
 use crate::name::NameParts;
 
 use super::format::{NameFormatter, PersonFormatter};
@@ -27,6 +27,9 @@ impl PersonFormatter for PlainFormatter {
                 }
                 if let Some(ref password) = r.password {
                     parts.push(password.clone());
+                }
+                if let Some(ref birthday) = r.birthday {
+                    parts.push(birthday.clone());
                 }
                 parts.join(" | ")
             })
@@ -92,6 +95,7 @@ mod tests {
             },
             email: None,
             password: None,
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();
@@ -109,6 +113,7 @@ mod tests {
             },
             email: Some("john.smith@example.com".to_string()),
             password: None,
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();
@@ -126,6 +131,7 @@ mod tests {
             },
             email: None,
             password: Some("secret123".to_string()),
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();
@@ -143,6 +149,7 @@ mod tests {
             },
             email: Some("john.smith@example.com".to_string()),
             password: Some("secret123".to_string()),
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();

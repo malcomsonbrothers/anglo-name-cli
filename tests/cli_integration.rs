@@ -31,13 +31,13 @@ fn test_generates_correct_count() {
 }
 
 #[test]
-fn test_male_gender() {
-    cmd().args(["-n", "10", "-g", "male"]).assert().success();
+fn test_male_sex() {
+    cmd().args(["-n", "10", "-s", "male"]).assert().success();
 }
 
 #[test]
-fn test_female_gender() {
-    cmd().args(["-n", "10", "-g", "female"]).assert().success();
+fn test_female_sex() {
+    cmd().args(["-n", "10", "-s", "female"]).assert().success();
 }
 
 #[test]
@@ -122,7 +122,7 @@ fn test_unique_names_by_default() {
 fn test_error_when_requesting_too_many_unique() {
     // Request more unique names than possible (male only, no middle = 741 * 500 = 370,500)
     cmd()
-        .args(["-n", "400000", "-g", "male"])
+        .args(["-n", "400000", "-s", "male"])
         .assert()
         .failure()
         .stderr(predicate::str::contains("Cannot generate"));
@@ -267,4 +267,142 @@ fn test_email_strips_apostrophes() {
             }
         }
     }
+}
+
+// Birthday tests
+
+#[test]
+fn test_birthday_date_mode() {
+    let output = cmd()
+        .args([
+            "--birthday-from",
+            "01-01-1990",
+            "--birthday-to",
+            "31-12-1999",
+        ])
+        .output()
+        .unwrap();
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    // Output should contain a date in DD-MM-YYYY format
+    assert!(
+        stdout.contains("-"),
+        "Output should contain birthday with hyphens"
+    );
+}
+
+#[test]
+fn test_birthday_age_single() {
+    cmd()
+        .args(["--age", "25"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("-")); // Birthday contains hyphens
+}
+
+#[test]
+fn test_birthday_age_range() {
+    cmd()
+        .args(["--age-from", "25", "--age-to", "30"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("-"));
+}
+
+#[test]
+fn test_birthday_to_requires_from() {
+    cmd()
+        .args(["--birthday-to", "31-12-1999"])
+        .assert()
+        .failure();
+}
+
+#[test]
+fn test_age_to_requires_age_from() {
+    cmd().args(["--age-to", "30"]).assert().failure();
+}
+
+#[test]
+fn test_date_and_age_mutually_exclusive() {
+    cmd()
+        .args([
+            "--birthday-from",
+            "01-01-1990",
+            "--birthday-to",
+            "31-12-1999",
+            "--age",
+            "25",
+        ])
+        .assert()
+        .failure();
+}
+
+#[test]
+fn test_invalid_date_error() {
+    cmd()
+        .args([
+            "--birthday-from",
+            "31-02-1990",
+            "--birthday-to",
+            "31-12-1999",
+        ])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("Invalid date"));
+}
+
+#[test]
+fn test_json_with_birthday() {
+    cmd()
+        .args(["-f", "json", "--age", "25"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"birthday\":"));
+}
+
+#[test]
+fn test_csv_with_birthday() {
+    cmd()
+        .args(["-f", "csv", "--age", "25"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("birthday"));
+}
+
+#[test]
+fn test_birthday_format_dd_mm_yyyy() {
+    let output = cmd().args(["--age", "25"]).output().unwrap();
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    // Extract birthday from pipe-separated output
+    let parts: Vec<&str> = stdout.trim().split(" | ").collect();
+    if parts.len() >= 2 {
+        let birthday = parts[1];
+        // Should be DD-MM-YYYY format
+        assert_eq!(
+            birthday.len(),
+            10,
+            "Birthday should be 10 chars: {}",
+            birthday
+        );
+        let date_parts: Vec<&str> = birthday.split('-').collect();
+        assert_eq!(
+            date_parts.len(),
+            3,
+            "Birthday should have 3 parts separated by -"
+        );
+        assert_eq!(date_parts[0].len(), 2, "Day should be 2 digits");
+        assert_eq!(date_parts[1].len(), 2, "Month should be 2 digits");
+        assert_eq!(date_parts[2].len(), 4, "Year should be 4 digits");
+    }
+}
+
+#[test]
+fn test_birthday_with_email_and_password() {
+    cmd()
+        .args(["--age", "25", "--email", "--password"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("@"))
+        .stdout(predicate::str::contains("|"));
 }

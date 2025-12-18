@@ -1,7 +1,7 @@
 use anyhow::Context;
 use serde::Serialize;
 
-use crate::credentials::PersonRecord;
+use crate::creds::PersonRecord;
 use crate::name::NameParts;
 
 use super::format::{NameFormatter, PersonFormatter};
@@ -37,6 +37,8 @@ struct JsonPerson {
     email: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     password: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    birthday: Option<String>,
 }
 
 impl From<&PersonRecord> for JsonPerson {
@@ -48,6 +50,7 @@ impl From<&PersonRecord> for JsonPerson {
             full_name: record.name.full_name(),
             email: record.email.clone(),
             password: record.password.clone(),
+            birthday: record.birthday.clone(),
         }
     }
 }
@@ -136,6 +139,7 @@ mod tests {
             },
             email: None,
             password: None,
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();
@@ -155,6 +159,7 @@ mod tests {
             },
             email: Some("john.smith@example.com".to_string()),
             password: None,
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();
@@ -173,6 +178,7 @@ mod tests {
             },
             email: Some("john.smith@example.com".to_string()),
             password: Some("secret123".to_string()),
+            birthday: None,
         }];
 
         let output = PersonFormatter::format(&formatter, &records).unwrap();

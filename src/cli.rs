@@ -14,9 +14,9 @@ pub struct Args {
     #[arg(short = 'n', long, default_value = "1")]
     pub count: usize,
 
-    /// Gender for first names (male, female, or any)
+    /// Sex for first names (male, female, or any)
     #[arg(short, long, value_enum, default_value = "any")]
-    pub gender: GenderArg,
+    pub sex: SexArg,
 
     /// Include middle name
     #[arg(short, long)]
@@ -45,22 +45,42 @@ pub struct Args {
     /// Email domain (default: random gmail.com or outlook.com)
     #[arg(short = 'd', long, requires = "email")]
     pub domain: Option<String>,
+
+    /// Start date for birthday range (DD-MM-YYYY)
+    #[arg(long, requires = "birthday_to", conflicts_with_all = ["age", "age_from", "age_to"])]
+    pub birthday_from: Option<String>,
+
+    /// End date for birthday range (DD-MM-YYYY)
+    #[arg(long, requires = "birthday_from", conflicts_with_all = ["age", "age_from", "age_to"])]
+    pub birthday_to: Option<String>,
+
+    /// Single age - everyone is exactly this age (years old today)
+    #[arg(long, conflicts_with_all = ["birthday_from", "birthday_to", "age_from", "age_to"])]
+    pub age: Option<u32>,
+
+    /// Minimum age for age range
+    #[arg(long, requires = "age_to", conflicts_with_all = ["birthday_from", "birthday_to", "age"])]
+    pub age_from: Option<u32>,
+
+    /// Maximum age for age range
+    #[arg(long, requires = "age_from", conflicts_with_all = ["birthday_from", "birthday_to", "age"])]
+    pub age_to: Option<u32>,
 }
 
 #[derive(ValueEnum, Clone, Debug, Default)]
-pub enum GenderArg {
+pub enum SexArg {
     Male,
     Female,
     #[default]
     Any,
 }
 
-impl From<GenderArg> for Gender {
-    fn from(arg: GenderArg) -> Self {
+impl From<SexArg> for Gender {
+    fn from(arg: SexArg) -> Self {
         match arg {
-            GenderArg::Male => Gender::Male,
-            GenderArg::Female => Gender::Female,
-            GenderArg::Any => Gender::Any,
+            SexArg::Male => Gender::Male,
+            SexArg::Female => Gender::Female,
+            SexArg::Any => Gender::Any,
         }
     }
 }
