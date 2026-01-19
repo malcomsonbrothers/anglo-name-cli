@@ -1,3 +1,6 @@
+use rand::seq::SliceRandom;
+use rand::Rng;
+
 /// Trait for password generation strategies.
 pub trait PasswordGenerator: Send + Sync {
     /// Generate a random password.
@@ -5,6 +8,7 @@ pub trait PasswordGenerator: Send + Sync {
 }
 
 /// Standard password generator with configurable character sets.
+/// Uses a cryptographically secure random number generator.
 pub struct StandardPasswordGenerator {
     length: usize,
 }
@@ -29,24 +33,25 @@ const SPECIAL: &[u8] = b"!@#$%^&*";
 
 impl PasswordGenerator for StandardPasswordGenerator {
     fn generate(&self) -> String {
+        let mut rng = rand::thread_rng();
         let all_chars: Vec<u8> = [UPPERCASE, LOWERCASE, DIGITS, SPECIAL].concat();
 
         let mut password = Vec::with_capacity(self.length);
 
         // Guarantee at least one character from each category
-        password.push(UPPERCASE[fastrand::usize(..UPPERCASE.len())]);
-        password.push(LOWERCASE[fastrand::usize(..LOWERCASE.len())]);
-        password.push(DIGITS[fastrand::usize(..DIGITS.len())]);
-        password.push(SPECIAL[fastrand::usize(..SPECIAL.len())]);
+        password.push(UPPERCASE[rng.gen_range(0..UPPERCASE.len())]);
+        password.push(LOWERCASE[rng.gen_range(0..LOWERCASE.len())]);
+        password.push(DIGITS[rng.gen_range(0..DIGITS.len())]);
+        password.push(SPECIAL[rng.gen_range(0..SPECIAL.len())]);
 
         // Fill remaining characters randomly from combined pool
         let remaining = self.length.saturating_sub(4);
         for _ in 0..remaining {
-            password.push(all_chars[fastrand::usize(..all_chars.len())]);
+            password.push(all_chars[rng.gen_range(0..all_chars.len())]);
         }
 
         // Shuffle to avoid predictable positions
-        fastrand::shuffle(&mut password);
+        password.shuffle(&mut rng);
 
         // Safe because all characters are ASCII
         String::from_utf8(password).expect("password contains only ASCII characters")
